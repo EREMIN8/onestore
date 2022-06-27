@@ -17,12 +17,27 @@ class DeviceController {
         } catch (e) {
             next(ApiError.badRequest(e.message))
         }
-
-
-
     }
 
     async getAll(req, res) {
+        let {brandId, typeId, limit, page} = req.query
+        page = page || 1
+        limit = limit || 9
+        let offset = page * limit - limit
+        let devices;
+        if (!brandId && !typeId) {
+            devices = await Devices.findAll({limit, offset})
+        }
+        if (brandId && !typeId) {
+            devices = await Devices.findAll({where:{brandId}, limit, offset})
+        }
+        if (!brandId && typeId) {
+            devices = await Devices.findAll({where:{typeId}, limit, offset})
+        }
+        if (brandId && typeId) {
+            devices = await Devices.findAll({where:{brandId, typeId}, limit, offset})
+        }
+        return res.json(devices)
 
     }
 
